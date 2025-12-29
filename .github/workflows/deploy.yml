@@ -1,0 +1,33 @@
+name: Deploy Website
+
+on:
+  push:
+    branches:
+      - main   # or your default branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout your repo
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2️⃣ Setup SSH key
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H 100.31.137.81 >> ~/.ssh/known_hosts
+
+      # 3️⃣ Deploy to server
+      - name: Deploy to Server
+        run: |
+          ssh 100.31.137.81 "
+          cd /var/www/Nvirse_git &&
+          git pull origin main &&
+          # optional: restart services if needed
+          sudo systemctl restart nginx
+          "
